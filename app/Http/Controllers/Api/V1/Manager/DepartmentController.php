@@ -6,106 +6,45 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Department;
 use Illuminate\Support\Facades\DB;
+use App\Interfaces\DepInterface;
+
 
 
 class DepartmentController extends Controller
 {
+    use \App\Traits\ApiResponseTrait;
+
+    protected $repo;
+    function __construct(DepInterface $repo)
+    {
+        $this->repo = $repo;
+    }
+
     public function store(Request $request)
     {
-        $request->validate([
-            'name' =>'required',
-            'descrption' => 'required'
-        ]);
-        $department = Department::create([
-            'name' => $request->name,
-            'descrption' => $request->descrption
-        ]);
-        return response()->json([
-            'success' => true,
-            'Message' => 'Department Added Successfully'
-        ]);
+        $this->repo->store($request);
     }
 
     public function edit($id)
     {
-        $department = Department::findOrfail($id);
-        if(!$department){
-            return response()->json([
-                'Message' => 'Department Doesnt Exist'
-            ]);
-        }
-        else {
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'Department' =>$department
-                ],
-            ]);
-        }
+        return $this->repo->edit($id);
+
     }
 
     public function update( Request $request)
     {
-        $department = Department::findOrfail($request->id);
-        if(!$department){
-            return response()->json([
-                'Message' => 'Department Doesnt Exist'
-            ]);
-        }
-        else {
-            $department->name = $request->name;
-            $department->descrption = $request->descrption;
-            $department->update();
-            return response()->json([
-                'success' => true,
-                'message' => 'Department Updated Successfuly',
-                'data' => [
-                    'Department' =>$department
-                ],
-            ]);
-        }
+        return $this->repo->update($request);
     }
 
 
     public function Search(Request $request)
     {
-        $department = Department::query()
-        ->withCount([
-            'employees',
-            'employees as Total_Salaries'=> function($query) {
-                $query->select(DB::raw('sum(salary)'));
-            }
-        ])
-        ->when($request->name, function($query) use ($request) {
-              $query->where('name', $request->name);
-        })
-        ->get();
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'Department' =>$department
-            ],
-        ]);
+        return $this->repo->Search($request);
     }
 
     public function delete($id)
     {
-        $department = Department::find($id);
-        if($department){
-            $department->delete();
-        }
-        else{
-            return response()->json([
-                'success' => false,
-                'Message' => 'Department Doesnt Exist'
-            ]);
-        }
-        return response()->json([
-            'success' => true,
-            'Message' => 'Department Deleted Successfully'
-        ]);
-
-
+        return $this->repo->delete($id);
     }
 
 

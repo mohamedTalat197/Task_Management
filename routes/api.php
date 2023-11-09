@@ -43,5 +43,3 @@ Route::post('store/task',[\App\Http\Controllers\Api\v1\Manager\TaskController::c
 ->middleware('auth:sanctum');
 Route::get('get/task',[\App\Http\Controllers\Api\v1\Manager\TaskController::class, 'get'])
 ->middleware('auth:sanctum');
-
-
